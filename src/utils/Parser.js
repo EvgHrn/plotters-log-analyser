@@ -26,11 +26,20 @@ export class Parser {
 			"(\\sAborted.*\\s)?", "gm"
 		);
 
+		const headRegExpStr = headRegExp.toString().replace();
+
+		const bodyRegExp = new RegExp(`(?<=${headRegExp})(?>=${footerRegExp})`, 'gm');
+
 		const heads = str.match(headRegExp);
 		console.log('jobs: ', heads);
 
 		const footers = str.match(footerRegExp);
 		console.log('footers: ', footers);
+
+		console.log("headRegExp: ", headRegExp.toString());
+
+		// const bodes = str.match(bodyRegExp);
+		// console.log('bodes: ', bodes);
 
 	}
 }
