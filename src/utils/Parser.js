@@ -1,61 +1,23 @@
 export class Parser {
 
-	static getHeads = (str) => {
-		const headRegExp = new RegExp("StartDate.*\\s\\s" +
-			"StartTime.*\\s\\s" +
-			"Printer.*\\s\\s" +
-			"Halftone.*\\s\\s" +
-			"Copies.*\\s\\s" +
-			"Mirror.*\\s\\s" +
-			"Sharpen.*\\s\\s" +
-			"InkLimit.*\\s\\s" +
-			"Density.*\\s\\s" +
-			"PrinterProfile.*\\s", "gm"
-		);
-		return str.match(headRegExp);
-	};
-
-	static getBodies = (str, heads, footers) => {
-		let bodies = [];
-
-		for(let i = 0; i < heads.length; i++) {
-			const bodyStartIndex = str.indexOf(heads[i]) + heads[i].length;
-			const bodyEndIndex = str.indexOf(footers[i]);
-			bodies.push(str.slice(bodyStartIndex, bodyEndIndex));
+	static getJobs = (str) => {
+		const jobsArr = str.match(/(?<=StartDate)[\s\S]+?(?=(StartDate|$))/g).map((jobStr) => "StartDate" + jobStr);
+		if(jobsArr.length === 0) {
+			return false;
+		} else {
+			return jobsArr;
 		}
-
-		return bodies;
 	};
 
-	static getFooters = (str) => {
-		const footerRegExp = new RegExp("ConsumedCm.*\\s\\s" +
-			"InkCyan.*\\s\\s" +
-			"InkMagenta.*\\s\\s" +
-			"InkYellow.*\\s\\s" +
-			"InkBlack.*\\s\\s" +
-			"InkLC.*\\s\\s" +
-			"InkLM.*\\s\\s" +
-			"PrintEnd.*\\s\\s" +
-			"MinutesTotal.*\\s" +
-			"(\\sAborted.*\\s)?", "gm"
-		);
-		return str.match(footerRegExp);
-	};
-
-	static getImages = (body) => {
-		return body.trim().split("\n\r");
-	};
-
-	static headParse = (headStr) => {
-
-		const startDate = headStr.match(/(?<=StartDate)\s+.+/)[0].trim();
-		const startTime = headStr.match(/(?<=StartTime)\s+.+/)[0].trim();
-		const printer = headStr.match(/(?<=Printer)\s+.+/)[0].trim();
-		const halftone = headStr.match(/(?<=Halftone)\s+.+/)[0].trim();
-		const copies = headStr.match(/(?<=Copies)\s+.+/)[0].trim();
-		const mirror = headStr.match(/(?<=Mirror)\s+.+/)[0].trim();
-		const density = headStr.match(/(?<=Density)\s+.+/)[0].trim();
-		const printerProfile = headStr.match(/(?<=PrinterProfile)\s+.+/)[0].trim();
+	static getHeadObjFromJobStr = (jobStr) => {
+		const startDate = jobStr.match(/(?<=StartDate)\s+.+/)[0].trim();
+		const startTime = jobStr.match(/(?<=StartTime)\s+.+/)[0].trim();
+		const printer = jobStr.match(/(?<=Printer)\s+.+/)[0].trim();
+		const halftone = jobStr.match(/(?<=Halftone)\s+.+/)[0].trim();
+		const copies = jobStr.match(/(?<=Copies)\s+.+/)[0].trim();
+		const mirror = jobStr.match(/(?<=Mirror)\s+.+/)[0].trim();
+		const density = jobStr.match(/(?<=Density)\s+.+/)[0].trim();
+		const printerProfile = jobStr.match(/(?<=PrinterProfile)\s+.+/)[0].trim();
 
 		return {
 			startDate,
@@ -69,14 +31,54 @@ export class Parser {
 		};
 	};
 
-	/**
-	 *
-	 * @param imageStr
-	 * @returns {{imgName: string, inputProfile: string, widthCm: string, heightCm: string, rotated: number, areaCm2: string}}
-	 */
-	static imageParse = (imageStr) => {
+	static getFooterObjFromJobStr = (jobStr) => {
 
+		if(! jobStr.match(/(?<=ConsumedCm)\s+.+/)) {
+			return false;
+		}
+
+		const consumedCm = jobStr.match(/(?<=ConsumedCm)\s+.+/)[0].trim();
+		const inkCyan = jobStr.match(/(?<=InkCyan)\s+.+/)[0].trim();
+		const inkMagenta = jobStr.match(/(?<=InkMagenta)\s+.+/)[0].trim();
+		const inkYellow = jobStr.match(/(?<=InkYellow)\s+.+/)[0].trim();
+		const inkBlack = jobStr.match(/(?<=InkBlack)\s+.+/)[0].trim();
+		const inkLC = jobStr.match(/(?<=InkLC)\s+.+/)[0].trim();
+		const inkLM = jobStr.match(/(?<=InkLM)\s+.+/)[0].trim();
+		const printEnd = jobStr.match(/(?<=PrintEnd)\s+.+/)[0].trim();
+		const minutesTotal = jobStr.match(/(?<=MinutesTotal)\s+.+/)[0].trim();
+
+		let aborted = "0";
+
+		try {
+			aborted = jobStr.match(/(?<=Aborted)\s+.+/)[0].trim();
+		} catch (e) {
+			;
+		}
+
+		return {
+			consumedCm,
+			inkCyan,
+			inkMagenta,
+			inkYellow,
+			inkBlack,
+			inkLC,
+			inkLM,
+			printEnd,
+			minutesTotal,
+			aborted
+		};
+	};
+
+	static getImagesObjectsArrFromJobStr = (jobStr) => {
+		const bodyStr = "ImgName" + jobStr.match(/(?<=ImgName)[\s|\S]+?(?=(ConsumedCm|$))/g)[0];
+		const imagesStrArr = bodyStr.trim().split("\n\r").map(str => str.trim());
+		return imagesStrArr.map((imageStr) => this.imageParse(imageStr));
+	};
+
+	static imageParse = (imageStr) => {
+		console.log("imageStr: ", imageStr);
 		const imgName = imageStr.match(/(?<=ImgName)\s+.+/)[0].trim();
+		// RipStart
 		const widthCm = imageStr.match(/(?<=WidthCm)\s+.+/)[0].trim();
 		const heightCm = imageStr.match(/(?<=HeightCm)\s+.+/)[0].trim();
 		const areaCm2 = imageStr.match(/(?<=AreaCm2)\s+.+/)[0].trim();
@@ -100,73 +102,26 @@ export class Parser {
 
 	};
 
-	static footerParse = (footerStr) => {
-
-		const consumedCm = footerStr.match(/(?<=ConsumedCm)\s+.+/)[0].trim();
-		const inkCyan = footerStr.match(/(?<=InkCyan)\s+.+/)[0].trim();
-		const inkMagenta = footerStr.match(/(?<=InkMagenta)\s+.+/)[0].trim();
-		const inkYellow = footerStr.match(/(?<=InkYellow)\s+.+/)[0].trim();
-		const inkBlack = footerStr.match(/(?<=InkBlack)\s+.+/)[0].trim();
-		const inkLC = footerStr.match(/(?<=InkLC)\s+.+/)[0].trim();
-		const inkLM = footerStr.match(/(?<=InkLM)\s+.+/)[0].trim();
-		const printEnd = footerStr.match(/(?<=PrintEnd)\s+.+/)[0].trim();
-		const minutesTotal = footerStr.match(/(?<=MinutesTotal)\s+.+/)[0].trim();
-
-		let aborted = "0";
-
-		try {
-			aborted = footerStr.match(/(?<=Aborted)\s+.+/)[0].trim();
-		} catch (e) {
-			;
+	static jobParse = (jobStr) => {
+		const headObj = this.getHeadObjFromJobStr(jobStr);
+		const imagesObjectsArr = this.getImagesObjectsArrFromJobStr(jobStr);
+		let footerObj = this.getFooterObjFromJobStr(jobStr);
+		if(! footerObj) {
+			footerObj = { fail: true };
 		}
-
 		return {
-			consumedCm,
-			inkCyan,
-			inkMagenta,
-			inkYellow,
-			inkBlack,
-			inkLC,
-			inkLM,
-			printEnd,
-			minutesTotal,
-			aborted
-		};
+			...headObj,
+			...footerObj,
+			images: imagesObjectsArr
+		}
 	};
 
 	static parse = (str) => {
-
-		const heads = this.getHeads(str);
-		console.log('heads: ', heads);
-
-		const footers = this.getFooters(str);
-		console.log('footers: ', footers);
-
-		if(heads.length !== footers.length) {
-			throw new Error("Parsing error");
-		}
-
-		const bodies = this.getBodies(str, heads, footers);
-		console.log('bodies: ', bodies);
-
 		let result = [];
-
-		for (let i = 0; i < heads.length; i++) {
-
-			const imagesStrArr = this.getImages(bodies[i]);
-
-			const imageObjectsArr = imagesStrArr.map((imageStr) => this.imageParse(imageStr));
-
-			result.push({
-				...this.headParse(heads[i]),
-				...this.footerParse(footers[i]),
-				images: imageObjectsArr
-			});
-
+		const jobsStrArr = this.getJobs(str);
+		for(let i = 0; i < jobsStrArr.length; i++) {
+			result.push(this.jobParse(jobsStrArr[i]));
 		}
-
 		console.log("result: ", result);
-
-		return result;
-	}
+	};
 }
