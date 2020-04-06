@@ -1,7 +1,6 @@
 export class Parser {
 
-	static parse = (str) => {
-
+	static getHeads = (str) => {
 		const headRegExp = new RegExp("StartDate.*\\s\\s" +
 			"StartTime.*\\s\\s" +
 			"Printer.*\\s\\s" +
@@ -13,7 +12,22 @@ export class Parser {
 			"Density.*\\s\\s" +
 			"PrinterProfile.*\\s", "gm"
 		);
+		return str.match(headRegExp);
+	};
 
+	static getBodies = (str, heads, footers) => {
+		let bodies = [];
+
+		for(let i = 0; i < heads.length; i++) {
+			const bodyStartIndex = str.indexOf(heads[i]) + heads[i].length;
+			const bodyEndIndex = str.indexOf(footers[i]);
+			bodies.push(str.slice(bodyStartIndex, bodyEndIndex));
+		}
+
+		return bodies;
+	};
+
+	static getFooters = (str) => {
 		const footerRegExp = new RegExp("ConsumedCm.*\\s\\s" +
 			"InkCyan.*\\s\\s" +
 			"InkMagenta.*\\s\\s" +
@@ -25,25 +39,22 @@ export class Parser {
 			"MinutesTotal.*\\s" +
 			"(\\sAborted.*\\s)?", "gm"
 		);
+		return str.match(footerRegExp);
+	};
 
-		const heads = str.match(headRegExp);
+	static parse = (str) => {
+
+		const heads = this.getHeads(str);
 		console.log('jobs: ', heads);
 
-		const footers = str.match(footerRegExp);
+		const footers = this.getFooters(str);
 		console.log('footers: ', footers);
 
 		if(heads.length !== footers.length) {
 			throw new Error("Parsing error");
 		}
 
-		let bodes = [];
-
-		for(let i = 0; i < heads.length; i++) {
-			const bodyStartIndex = str.indexOf(heads[i]) + heads[i].length;
-			const bodyEndIndex = str.indexOf(footers[i]);
-			bodes.push(str.slice(bodyStartIndex, bodyEndIndex));
-		}
-
-		console.log('bodes: ', bodes);
+		const bodies = this.getBodies(str, heads, footers);
+		console.log('bodies: ', bodies);
 	}
 }
