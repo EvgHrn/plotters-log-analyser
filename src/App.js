@@ -17,9 +17,9 @@ function App() {
   };
 
   const searchHandle = (orderNumber) => {
-    const jobsFiltered = jobs.filter((jobObj) => {
-      jobObj.images.some((imageObj) => imageObj.imgName.includes(orderNumber));
-    });
+    const jobsFiltered = jobs.filter((jobObj => {
+      return jobObj.images.some((imageObj) => imageObj.imgName.includes(orderNumber));
+    }));
     setJobsCount(jobsFiltered.length);
   };
 
