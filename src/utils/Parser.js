@@ -26,20 +26,24 @@ export class Parser {
 			"(\\sAborted.*\\s)?", "gm"
 		);
 
-		const headRegExpStr = headRegExp.toString().replace();
-
-		const bodyRegExp = new RegExp(`(?<=${headRegExp})(?>=${footerRegExp})`, 'gm');
-
 		const heads = str.match(headRegExp);
 		console.log('jobs: ', heads);
 
 		const footers = str.match(footerRegExp);
 		console.log('footers: ', footers);
 
-		console.log("headRegExp: ", headRegExp.toString());
+		if(heads.length !== footers.length) {
+			throw new Error("Parsing error");
+		}
 
-		// const bodes = str.match(bodyRegExp);
-		// console.log('bodes: ', bodes);
+		let bodes = [];
 
+		for(let i = 0; i < heads.length; i++) {
+			const bodyStartIndex = str.indexOf(heads[i]) + heads[i].length;
+			const bodyEndIndex = str.indexOf(footers[i]);
+			bodes.push(str.slice(bodyStartIndex, bodyEndIndex));
+		}
+
+		console.log('bodes: ', bodes);
 	}
 }
