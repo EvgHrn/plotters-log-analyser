@@ -1,4 +1,4 @@
-export class Parser {
+class Parser {
 
 	static getJobs = (str) => {
 		const jobsArr = str.match(/(?<=StartDate)[\s\S]+?(?=(StartDate|$))/g).map((jobStr) => "StartDate" + jobStr);
@@ -123,5 +123,8 @@ export class Parser {
 			result.push(this.jobParse(jobsStrArr[i]));
 		}
 		console.log("result: ", result);
+		return result;
 	};
 }
+
+export default Parser;
