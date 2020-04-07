@@ -1,61 +1,141 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import './App.css';
-import Dropzone from './components/Dropzone';
+import LogsInput from './components/LogsInput';
+import AccessInput from './components/AccessInput';
 import Parser from './utils/Parser';
 import Search from './components/Search';
 import ResultsTable from './components/ResultsTable';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
+}));
 
 function App() {
 
-  const [jobs, setJobs] = useState([]);
+  const classes = useStyles();
 
-  const [jobsCount, setJobsCount] = useState(0);
+  const [backdropOpen, setBackdrop] = useState(false);
+
+  const [logOrders, setLogOrders] = useState([]);
+
+  const [accessOrders, setAccessOrders] = useState([]);
 
   const [results, setResults] = useState([]);
 
   const logHandle = (text) => {
-    const jobsArr = jobs.concat(Parser.parse(text));
-    setJobs(jobsArr);
-    setJobsCount(jobsArr.length);
+    setBackdrop(true);
+    const jobsArr = logOrders.concat(Parser.parse(text));
+    setLogOrders(jobsArr);
   };
 
-  const searchHandle = (orderNumber) => {
+  const accessHandle = (dataJson) => {
+    console.log("dataJson: ", dataJson);
+    setAccessOrders(dataJson);
+  };
 
-    const jobsFiltered = jobs.filter((jobObj => {
-      return jobObj.images.some((imageObj) => imageObj.imgName.includes(orderNumber));
-    }));
+  const calculateResults = (jobsArr, accessArr) => {
 
-    const results = jobsFiltered.reduce((acc, jobObj) => {
-      let imagesCount = 0;
-      if(jobObj.fail) {
-        imagesCount = "Fail";
-      } else {
-        imagesCount = jobObj.images.reduce((count, imageObj) => {
-          if(imageObj.imgName.includes(orderNumber))
-            count++;
-          return count;
-        }, 0);
+    /*
+    {
+      logOrder,
+      logOrder count,
+      accessOrder count
+    }
+    */
+
+    setBackdrop(true);
+
+    console.log("jobsArr: ", jobsArr);
+
+    // get list of all files paths
+    const logFileNames = jobsArr.reduce((acc, orderObj) => {
+      if(orderObj.aborted === "1") {
+        return acc;
       }
-      acc.push({
-        dateTime: jobObj.startDate + " " + jobObj.startTime,
-        imagesCount,
-        orderNumber
-      });
-      return acc;
+      const orderImagesNamesArr = orderObj.images.reduce((acc, imageObj) => {
+        const imageFullPath = imageObj["imgName"];
+        const imageName = imageFullPath.split("\\").pop();
+        acc.push(imageName);
+        return acc;
+      }, []);
+      return acc.concat(orderImagesNamesArr);
     }, []);
 
-    console.log("Search results: ", results);
+    const orderNumbers = logFileNames.map(fileName => {
+      let number = fileName.match(/\d{6}/);
+      if(!number) {
+        number = fileName;
+      } else {
+        number = number[0];
+      }
+      return number;
+    });
 
-    setJobsCount(jobsFiltered.length);
-    setResults(results);
+    console.log("orders numbers: ", orderNumbers);
+
+    const orderNumbersUnique = [ ...new Set(orderNumbers) ];
+
+    console.log("Unique orders numbers: ", orderNumbersUnique);
+
+    const numberAndCountsObjArr = orderNumbersUnique.map(number => {
+      const count = orderNumbers.reduce((acc, orderNumber) => {
+        if(number === orderNumber) {
+          acc++;
+        }
+        return acc;
+      }, 0);
+      return { number, count };
+    });
+
+    console.log("number And Counts Obj Arr: ", numberAndCountsObjArr);
+
+    console.log("Access array: ", accessArr);
+
+    const result = numberAndCountsObjArr.map(numberAndCountsObj => {
+      let accessCount = accessArr.find(accessObj => accessObj["Номер"].toString() === numberAndCountsObj.number.toString());
+      if(accessCount) {
+        accessCount = accessCount["Тираж"];
+      } else {
+        accessCount = 0;
+      }
+      return {
+        order: numberAndCountsObj.number,
+        logCount: numberAndCountsObj.count,
+        accessCount
+      };
+    });
+
+    result.sort((a, b) => a.order - b.order);
+
+    console.log("Results: ", results);
+
+    setResults(result);
+    setBackdrop(false);
   };
+
+  useEffect(() => {
+
+  }, [backdropOpen]);
+
+  useEffect(() => {
+    calculateResults(logOrders, accessOrders);
+  }, [logOrders, accessOrders]);
 
   return (
     <div className="App">
-      <Search searchHandle={searchHandle}/>
-      {/*<p>{jobsCount}</p>*/}
+      {/*<Search searchHandle={searchHandle}/>*/}
       <ResultsTable data={results}/>
-      <Dropzone setText={logHandle}/>
+      <LogsInput setText={logHandle}/>
+      <AccessInput setText={accessHandle}/>
+      <Backdrop className={classes.backdrop} open={backdropOpen}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </div>
   );
 }

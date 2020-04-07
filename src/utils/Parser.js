@@ -70,7 +70,7 @@ class Parser {
 	};
 
 	static getImagesObjectsArrFromJobStr = (jobStr) => {
-		console.log("jobStr: ", jobStr);
+		// console.log("jobStr: ", jobStr);
 
 		let bodyStr = "";
 
@@ -93,34 +93,52 @@ class Parser {
 	};
 
 	static imageParse = (imageStr) => {
-		console.log("imageStr: ", imageStr);
-		const imgName = imageStr.match(/(?<=ImgName)\s+.+/)[0].trim();
-		if(imageStr.includes("RipStart")) {
+		let imgName = imageStr.match(/(?<=ImgName)\s+.+/);
+		if(! imgName) {
+			console.log("Image ImgName parsing error with: ", imageStr);
 			return false;
 		}
-		const widthCm = imageStr.match(/(?<=WidthCm)\s+.+/)[0].trim();
-		const heightCm = imageStr.match(/(?<=HeightCm)\s+.+/)[0].trim();
+		imgName = imgName[0].trim();
+
+		if(imageStr.includes("RipStart")) {
+			console.log("Image parsing error with: ", imageStr);
+			return false;
+		}
+
+		let widthCm = imageStr.match(/(?<=WidthCm)\s+.+/);
+		if(! widthCm) {
+			console.log("Image WidthCm parsing error with: ", imageStr);
+			return false;
+		}
+		widthCm = widthCm[0].trim();
+
+		let heightCm = imageStr.match(/(?<=HeightCm)\s+.+/);
+		if(! heightCm) {
+			console.log("Image HeightCm parsing error with: ", imageStr);
+			return false;
+		}
+		heightCm = heightCm[0].trim();
 
 		let areaCm2 = imageStr.match(/(?<=AreaCm2)\s+.+/);
 		if(! areaCm2) {
+			console.log("Image AreaCm2 parsing error with: ", imageStr);
 			return false;
 		}
-		
 		areaCm2 = areaCm2[0].trim();
 
 		let inputProfile = imageStr.match(/(?<=InputProfile)\s+.+/);
 		if(! inputProfile) {
+			console.log("Image InputProfile parsing error with: ", imageStr);
 			inputProfile = "";
 		} else {
 			inputProfile = inputProfile[0].trim();
 		}
 
-		let rotated = 0;
-
-		try {
-			rotated = imageStr.match(/(?<=Rotated)\s+.+/)[0].trim();
-		} catch (e) {
-			// rotated = 0;
+		let rotated = imageStr.match(/(?<=Rotated)\s+.+/);
+		if(! rotated) {
+			rotated = 0;
+		} else {
+			rotated = rotated[0].trim();
 		}
 
 		return {
@@ -153,12 +171,15 @@ class Parser {
 	};
 
 	static parse = (str) => {
+		const t0 = performance.now();
 		let result = [];
 		const jobsStrArr = this.getJobs(str);
 		for(let i = 0; i < jobsStrArr.length; i++) {
 			result.push(this.jobParse(jobsStrArr[i]));
 		}
-		console.log("result: ", result);
+		const t1 = performance.now();
+		console.log("Parse result: ", result);
+		console.log("Parse took " + (t1 - t0) + " milliseconds.");
 		return result;
 	};
 }

@@ -1,7 +1,7 @@
 import React, {useCallback} from 'react';
 import {useDropzone} from 'react-dropzone';
 
-const Dropzone = (props) => {
+const LogsInput = (props) => {
 	const onDrop = useCallback((acceptedFiles) => {
 		acceptedFiles.forEach((file) => {
 			const reader = new FileReader();
@@ -23,11 +23,11 @@ const Dropzone = (props) => {
 			<input {...getInputProps()} />
 			{
 				isDragActive ?
-					<p>Drop the files here ...</p> :
-					<p>Drag 'n' drop some files here, or click to select files</p>
+					<p>Перетащите сюда файл логов ...</p> :
+					<p>Перетащите сюда файл логов или нажмите для выбора файла</p>
 			}
 		</div>
 	)
 };
 
-export default Dropzone;
+export default LogsInput;

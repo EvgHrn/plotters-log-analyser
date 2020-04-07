@@ -27,19 +27,20 @@ const ResultsTable = (props) => {
 			<Table className={classes.table} aria-label="simple table">
 				<TableHead>
 					<TableRow>
-						<TableCell>Time</TableCell>
-						<TableCell align="center">Number</TableCell>
-						<TableCell align="right">Count</TableCell>
+						{/*<TableCell>Время</TableCell>*/}
+						<TableCell align="center">Номер</TableCell>
+						<TableCell align="center">Кол-во</TableCell>
+						<TableCell align="center">Тираж</TableCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>
 					{rows.map((row) => (
-						<TableRow key={row.dateTime}>
-							<TableCell component="th" scope="row">
-								{row.dateTime}
+						<TableRow key={row.order}>
+							<TableCell component="th" scope="row" align="center">
+								{row.order}
 							</TableCell>
-							<TableCell align="center">{row.orderNumber}</TableCell>
-							<TableCell align="right">{row.imagesCount}</TableCell>
+							<TableCell align="center">{row.logCount}</TableCell>
+							<TableCell align="center">{row.accessCount}</TableCell>
 						</TableRow>
 					))}
 				</TableBody>
