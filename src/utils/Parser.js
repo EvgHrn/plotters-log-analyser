@@ -162,10 +162,10 @@ class Parser {
 		const nowDate = new Date();
 
 		const jobStartDate = parse(headObj.startDate, 'dd.MM.yyyy', new Date());
-		console.log("Job date: ", jobStartDate);
+		// console.log("Job date: ", jobStartDate);
 
 		if(differenceInDays(nowDate, jobStartDate) > 30) {
-			console.log("Job is too old.");
+			// console.log("Job is too old.");
 			return false;
 		}
 

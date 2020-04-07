@@ -12,6 +12,9 @@ const useStyles = makeStyles({
 	table: {
 		minWidth: 650,
 	},
+	warningRow: {
+		backgroundColor: '#ffbdce',
+	},
 });
 
 const ResultsTable = (props) => {
@@ -35,7 +38,7 @@ const ResultsTable = (props) => {
 				</TableHead>
 				<TableBody>
 					{rows.map((row) => (
-						<TableRow key={row.order}>
+						<TableRow key={row.order} className={(row.logCount > row.accessCount) ? classes.warningRow : null}>
 							<TableCell component="th" scope="row" align="center">
 								{row.order}
 							</TableCell>
