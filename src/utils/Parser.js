@@ -100,7 +100,14 @@ class Parser {
 		}
 		const widthCm = imageStr.match(/(?<=WidthCm)\s+.+/)[0].trim();
 		const heightCm = imageStr.match(/(?<=HeightCm)\s+.+/)[0].trim();
-		const areaCm2 = imageStr.match(/(?<=AreaCm2)\s+.+/)[0].trim();
+
+		let areaCm2 = imageStr.match(/(?<=AreaCm2)\s+.+/);
+		if(! areaCm2) {
+			return false;
+		}
+		
+		areaCm2 = areaCm2[0].trim();
+
 		let inputProfile = imageStr.match(/(?<=InputProfile)\s+.+/);
 		if(! inputProfile) {
 			inputProfile = "";
