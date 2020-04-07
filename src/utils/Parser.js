@@ -10,14 +10,14 @@ class Parser {
 	};
 
 	static getHeadObjFromJobStr = (jobStr) => {
-		const startDate = jobStr.match(/(?<=StartDate)\s+.+/)[0].trim();
-		const startTime = jobStr.match(/(?<=StartTime)\s+.+/)[0].trim();
-		const printer = jobStr.match(/(?<=Printer)\s+.+/)[0].trim();
-		const halftone = jobStr.match(/(?<=Halftone)\s+.+/)[0].trim();
-		const copies = jobStr.match(/(?<=Copies)\s+.+/)[0].trim();
-		const mirror = jobStr.match(/(?<=Mirror)\s+.+/)[0].trim();
-		const density = jobStr.match(/(?<=Density)\s+.+/)[0].trim();
-		const printerProfile = jobStr.match(/(?<=PrinterProfile)\s+.+/)[0].trim();
+		const startDate = jobStr.match(/(?<=StartDate)\s{1,20}.+/)[0].trim();
+		const startTime = jobStr.match(/(?<=StartTime)\s{1,20}.+/)[0].trim();
+		const printer = jobStr.match(/(?<=Printer)\s{1,20}.+/)[0].trim();
+		const halftone = jobStr.match(/(?<=Halftone)\s{1,20}.+/)[0].trim();
+		const copies = jobStr.match(/(?<=Copies)\s{1,20}.+/)[0].trim();
+		const mirror = jobStr.match(/(?<=Mirror)\s{1,20}.+/)[0].trim();
+		const density = jobStr.match(/(?<=Density)\s{1,20}.+/)[0].trim();
+		const printerProfile = jobStr.match(/(?<=PrinterProfile)\s{1,20}.+/)[0].trim();
 
 		return {
 			startDate,
@@ -37,15 +37,15 @@ class Parser {
 			return false;
 		}
 
-		const consumedCm = jobStr.match(/(?<=ConsumedCm)\s+.+/)[0].trim();
-		const inkCyan = jobStr.match(/(?<=InkCyan)\s+.+/)[0].trim();
-		const inkMagenta = jobStr.match(/(?<=InkMagenta)\s+.+/)[0].trim();
-		const inkYellow = jobStr.match(/(?<=InkYellow)\s+.+/)[0].trim();
-		const inkBlack = jobStr.match(/(?<=InkBlack)\s+.+/)[0].trim();
-		const inkLC = jobStr.match(/(?<=InkLC)\s+.+/)[0].trim();
-		const inkLM = jobStr.match(/(?<=InkLM)\s+.+/)[0].trim();
-		const printEnd = jobStr.match(/(?<=PrintEnd)\s+.+/)[0].trim();
-		const minutesTotal = jobStr.match(/(?<=MinutesTotal)\s+.+/)[0].trim();
+		const consumedCm = jobStr.match(/(?<=ConsumedCm)\s{1,20}.+/)[0].trim();
+		const inkCyan = jobStr.match(/(?<=InkCyan)\s{1,20}.+/)[0].trim();
+		const inkMagenta = jobStr.match(/(?<=InkMagenta)\s{1,20}.+/)[0].trim();
+		const inkYellow = jobStr.match(/(?<=InkYellow)\s{1,20}.+/)[0].trim();
+		const inkBlack = jobStr.match(/(?<=InkBlack)\s{1,20}.+/)[0].trim();
+		const inkLC = jobStr.match(/(?<=InkLC)\s{1,20}.+/)[0].trim();
+		const inkLM = jobStr.match(/(?<=InkLM)\s{1,20}.+/)[0].trim();
+		const printEnd = jobStr.match(/(?<=PrintEnd)\s{1,20}.+/)[0].trim();
+		const minutesTotal = jobStr.match(/(?<=MinutesTotal)\s{1,20}.+/)[0].trim();
 
 		let aborted = "0";
 
@@ -93,7 +93,7 @@ class Parser {
 	};
 
 	static imageParse = (imageStr) => {
-		let imgName = imageStr.match(/(?<=ImgName)\s+.+/);
+		let imgName = imageStr.match(/(?<=ImgName)\s{1,20}.+/);
 		if(! imgName) {
 			console.log("Image ImgName parsing error with: ", imageStr);
 			return false;
@@ -105,28 +105,28 @@ class Parser {
 			return false;
 		}
 
-		let widthCm = imageStr.match(/(?<=WidthCm)\s+.+/);
+		let widthCm = imageStr.match(/(?<=WidthCm)\s{1,20}.+/);
 		if(! widthCm) {
 			console.log("Image WidthCm parsing error with: ", imageStr);
 			return false;
 		}
 		widthCm = widthCm[0].trim();
 
-		let heightCm = imageStr.match(/(?<=HeightCm)\s+.+/);
+		let heightCm = imageStr.match(/(?<=HeightCm)\s{1,20}.+/);
 		if(! heightCm) {
 			console.log("Image HeightCm parsing error with: ", imageStr);
 			return false;
 		}
 		heightCm = heightCm[0].trim();
 
-		let areaCm2 = imageStr.match(/(?<=AreaCm2)\s+.+/);
+		let areaCm2 = imageStr.match(/(?<=AreaCm2)\s{1,20}.+/);
 		if(! areaCm2) {
 			console.log("Image AreaCm2 parsing error with: ", imageStr);
 			return false;
 		}
 		areaCm2 = areaCm2[0].trim();
 
-		let inputProfile = imageStr.match(/(?<=InputProfile)\s+.+/);
+		let inputProfile = imageStr.match(/(?<=InputProfile)\s{1,20}.+/);
 		if(! inputProfile) {
 			console.log("Image InputProfile parsing error with: ", imageStr);
 			inputProfile = "";
@@ -134,7 +134,7 @@ class Parser {
 			inputProfile = inputProfile[0].trim();
 		}
 
-		let rotated = imageStr.match(/(?<=Rotated)\s+.+/);
+		let rotated = imageStr.match(/(?<=Rotated)\s{1,20}.+/);
 		if(! rotated) {
 			rotated = 0;
 		} else {
