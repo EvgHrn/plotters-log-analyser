@@ -1,3 +1,6 @@
+import parse from 'date-fns/parse';
+import differenceInDays from 'date-fns/differenceInDays';
+
 class Parser {
 
 	static getJobs = (str) => {
@@ -156,6 +159,16 @@ class Parser {
 
 		const headObj = this.getHeadObjFromJobStr(jobStr);
 
+		const nowDate = new Date();
+
+		const jobStartDate = parse(headObj.startDate, 'dd.MM.yyyy', new Date());
+		console.log("Job date: ", jobStartDate);
+
+		if(differenceInDays(nowDate, jobStartDate) > 30) {
+			console.log("Job is too old.");
+			return false;
+		}
+
 		let imagesObjectsArr = this.getImagesObjectsArrFromJobStr(jobStr);
 
 		let footerObj = this.getFooterObjFromJobStr(jobStr);
@@ -175,7 +188,10 @@ class Parser {
 		let result = [];
 		const jobsStrArr = this.getJobs(str);
 		for(let i = 0; i < jobsStrArr.length; i++) {
-			result.push(this.jobParse(jobsStrArr[i]));
+			const jobObj = this.jobParse(jobsStrArr[i]);
+			if(jobObj) {
+				result.push(jobObj);
+			}
 		}
 		const t1 = performance.now();
 		console.log("Parse result: ", result);
