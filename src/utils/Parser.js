@@ -70,19 +70,44 @@ class Parser {
 	};
 
 	static getImagesObjectsArrFromJobStr = (jobStr) => {
-		const bodyStr = "ImgName" + jobStr.match(/(?<=ImgName)[\s|\S]+?(?=(ConsumedCm|$))/g)[0];
+		console.log("jobStr: ", jobStr);
+
+		let bodyStr = "";
+
+		try {
+			bodyStr = "ImgName" + jobStr.match(/(?<=ImgName)[\s\S]+?(?=(ConsumedCm|$))/g)[0];
+		} catch (e) {
+			bodyStr = "";
+			return [];
+		}
+
 		const imagesStrArr = bodyStr.trim().split("\n\r").map(str => str.trim());
-		return imagesStrArr.map((imageStr) => this.imageParse(imageStr));
+
+		return imagesStrArr.reduce((acc, imageStr) => {
+			const imageObj = this.imageParse(imageStr);
+			if(imageObj) {
+				acc.push(imageObj);
+			}
+			return acc;
+		}, []);
 	};
 
 	static imageParse = (imageStr) => {
 		console.log("imageStr: ", imageStr);
 		const imgName = imageStr.match(/(?<=ImgName)\s+.+/)[0].trim();
-		// RipStart
+		if(imageStr.includes("RipStart")) {
+			return false;
+		}
 		const widthCm = imageStr.match(/(?<=WidthCm)\s+.+/)[0].trim();
 		const heightCm = imageStr.match(/(?<=HeightCm)\s+.+/)[0].trim();
 		const areaCm2 = imageStr.match(/(?<=AreaCm2)\s+.+/)[0].trim();
-		const inputProfile = imageStr.match(/(?<=InputProfile)\s+.+/)[0].trim();
+		let inputProfile = imageStr.match(/(?<=InputProfile)\s+.+/);
+		if(! inputProfile) {
+			inputProfile = "";
+		} else {
+			inputProfile = inputProfile[0].trim();
+		}
+
 		let rotated = 0;
 
 		try {
@@ -103,12 +128,16 @@ class Parser {
 	};
 
 	static jobParse = (jobStr) => {
+
 		const headObj = this.getHeadObjFromJobStr(jobStr);
-		const imagesObjectsArr = this.getImagesObjectsArrFromJobStr(jobStr);
+
+		let imagesObjectsArr = this.getImagesObjectsArrFromJobStr(jobStr);
+
 		let footerObj = this.getFooterObjFromJobStr(jobStr);
 		if(! footerObj) {
 			footerObj = { fail: true };
 		}
+
 		return {
 			...headObj,
 			...footerObj,
@@ -128,3 +157,5 @@ class Parser {
 }
 
 export default Parser;
+
+// parse -> jobParse -> get Head Obj From JobStr -> get Images Objects Arr From JobStr -> get Footer Obj From JobStr
