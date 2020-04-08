@@ -7,8 +7,9 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import Search from './Search';
 
-const windowHeight = window.innerHeight - 100;
+const windowHeight = window.innerHeight - 150;
 
 const useStyles = makeStyles({
 	root: {
@@ -30,17 +31,30 @@ const useStyles = makeStyles({
 
 const ResultsTable = (props) => {
 
-	const classes = useStyles();
+	const [data, setData] = React.useState([]);
+	const [dataForSearch, setDataForSearch] = React.useState("");
 
-	const rows = props.data;
+	React.useEffect(() => {
+		if(dataForSearch.length === 0) {
+			console.log("Show all data");
+			setData(props.data);
+		} else {
+			console.log("Gonna filter table data");
+			const newDataArr = props.data.filter(obj => obj.logOrderNumber.toString().includes(dataForSearch.toString()) );
+			console.log("New table Data Arr: ", newDataArr);
+			setData(newDataArr);
+		}
+	}, [props.data, dataForSearch]);
+
+	const classes = useStyles();
 
 	return (
 		<Paper className={classes.root}>
+			<Search searchHandle={setDataForSearch}/>
 			<TableContainer className={classes.container}>
 			<Table className={classes.table} aria-label="simple table" stickyHeader={true} >
 				<TableHead>
 					<TableRow>
-						{/*<TableCell>Время</TableCell>*/}
 						<TableCell align="center">Номер</TableCell>
 						<TableCell align="center">Название</TableCell>
 						<TableCell align="center">Дата</TableCell>
@@ -53,7 +67,7 @@ const ResultsTable = (props) => {
 				</TableHead>
 				<TableBody>
 					{
-						rows.map((orderObj, index) => {
+						data.map((orderObj, index) => {
 							const jobsCount = orderObj.jobs.length;
 							return orderObj.jobs.map((jobObj, index) =>
 						    (

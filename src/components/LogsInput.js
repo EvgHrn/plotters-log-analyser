@@ -14,15 +14,21 @@ const LogsInput = (props) => {
 
 	const onDrop = useCallback((acceptedFiles) => {
 		console.log("Accepted Files: ", acceptedFiles);
+		let count = 0;
 		acceptedFiles.forEach((file) => {
 			const reader = new FileReader();
 			reader.onabort = () => console.log('file reading was aborted');
 			reader.onerror = () => console.log('file reading has failed');
-			reader.onload = () => {
-				props.setText(reader.result, findPlotterNumber(file.name));
+			reader.onloadstart = () => props.setBackdrop(true);
+			reader.onloadend = () => {
+				count++;
+				if(count >= acceptedFiles.length) {
+					props.setBackdrop(false);
+				}
 			};
+			reader.onload = () => props.setText(reader.result, findPlotterNumber(file.name));
 			reader.readAsText(file, "CP1251");
-		})
+		});
 	}, []);
 
 	const {getRootProps, getInputProps, isDragActive} = useDropzone({ onDrop });

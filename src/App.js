@@ -3,10 +3,9 @@ import './App.css';
 import LogsInput from './components/LogsInput';
 import AccessInput from './components/AccessInput';
 import Parser from './utils/Parser';
-// import Search from './components/Search';
 import ResultsTable from './components/ResultsTable';
-// import Backdrop from '@material-ui/core/Backdrop';
-// import CircularProgress from '@material-ui/core/CircularProgress';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
@@ -25,7 +24,7 @@ function App() {
 
   const classes = useStyles();
 
-  // const [backdropOpen, setBackdrop] = useState(false);
+  const [isBackdropOpen, setBackdrop] = useState(false);
 
   const [log1Orders, setLog1Orders] = useState([]);
   const [log2Orders, setLog2Orders] = useState([]);
@@ -191,6 +190,10 @@ function App() {
   };
 
   useEffect(() => {
+    console.log("Backdrop: ", isBackdropOpen);
+  }, [isBackdropOpen]);
+
+  useEffect(() => {
     const allLogOrders = [
       ...log1Orders,
       ...log2Orders,
@@ -207,13 +210,12 @@ function App() {
 
   return (
     <Container className={classes.app}>
-      {/*<Search searchHandle={searchHandle}/>*/}
       <ResultsTable data={results}/>
-      <LogsInput setText={logHandle}/>
-      <AccessInput setText={accessHandle}/>
-      {/*<Backdrop className={classes.backdrop} open={backdropOpen}>*/}
-      {/*  <CircularProgress color="inherit" />*/}
-      {/*</Backdrop>*/}
+      <LogsInput setText={logHandle} setBackdrop={setBackdrop}/>
+      <AccessInput setText={accessHandle} setBackdrop={setBackdrop}/>
+      <Backdrop className={classes.backdrop} open={isBackdropOpen}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Container >
   );
 }

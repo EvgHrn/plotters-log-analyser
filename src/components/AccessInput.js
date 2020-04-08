@@ -4,11 +4,19 @@ import XLSX from 'xlsx';
 
 const AccessInput = (props) => {
 	const onDrop = useCallback((acceptedFiles) => {
+		console.log("Accepted Files: ", acceptedFiles);
+		let count = 0;
 		acceptedFiles.forEach((file) => {
 			const reader = new FileReader();
-
 			reader.onabort = () => console.log('file reading was aborted');
 			reader.onerror = () => console.log('file reading has failed');
+			reader.onloadstart = () => props.setBackdrop(true);
+			reader.onloadend = () => {
+				count++;
+				if(count >= acceptedFiles.length) {
+					props.setBackdrop(false);
+				}
+			};
 			reader.onload = () => {
 				// Do whatever you want with the file contents
 				const data = new Uint8Array(reader.result);
