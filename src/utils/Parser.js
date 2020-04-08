@@ -50,12 +50,11 @@ class Parser {
 		const printEnd = jobStr.match(/(?<=PrintEnd)\s{1,20}.+/)[0].trim();
 		const minutesTotal = jobStr.match(/(?<=MinutesTotal)\s{1,20}.+/)[0].trim();
 
-		let aborted = "0";
-
-		try {
-			aborted = jobStr.match(/(?<=Aborted)\s+.+/)[0].trim();
-		} catch (e) {
-			;
+		let aborted = jobStr.match(/(?<=Aborted)\s+.+/);
+		if(! aborted) {
+			aborted = false;
+		} else {
+			aborted = true;
 		}
 
 		return {
@@ -96,12 +95,20 @@ class Parser {
 	};
 
 	static imageParse = (imageStr) => {
-		let imgName = imageStr.match(/(?<=ImgName)\s{1,20}.+/);
-		if(! imgName) {
+		let imgFullPath = imageStr.match(/(?<=ImgName)\s{1,20}.+/);
+		if(! imgFullPath) {
 			console.log("Image ImgName parsing error with: ", imageStr);
 			return false;
 		}
-		imgName = imgName[0].trim();
+		imgFullPath = imgFullPath[0].trim();
+
+		const imgName = imgFullPath.split("\\").pop();
+
+		let imgNumber = imgName.match(/\d{6}/);
+		if(! imgNumber) {
+			imgNumber = false;
+		}
+		imgNumber = imgNumber[0];
 
 		if(imageStr.includes("RipStart")) {
 			console.log("Image parsing error with: ", imageStr);
@@ -145,7 +152,9 @@ class Parser {
 		}
 
 		return {
+			imgFullPath,
 			imgName,
+			imgNumber,
 			widthCm,
 			heightCm,
 			areaCm2,

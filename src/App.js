@@ -43,11 +43,36 @@ function App() {
     setAccessOrders(dataJson);
   };
 
+  const getFilesList = (jobsArr) => {
+
+    const logFileNames = jobsArr.reduce((acc, orderObj) => {
+      const orderImagesNamesArr = orderObj.images.reduce((acc, imageObj) => {
+        if(! imageObj.imgNumber) {
+          acc.push(imageObj.imgName);
+        } else {
+          acc.push(imageObj.imgNumber);
+        }
+        return acc;
+      }, []);
+      return acc.concat(orderImagesNamesArr);
+    }, []);
+
+    return [ ...new Set(logFileNames) ];
+  };
+
   const calculateResults = (jobsArr, accessArr) => {
 
     /*
     {
-      logOrder,
+      logOrderNumber,
+      jobs: [
+        {
+          date,
+          plotter,
+          minutesTotal,
+          count | ?
+        }
+      ],
       logOrder count,
       accessOrder count
     }
@@ -58,66 +83,80 @@ function App() {
     console.log("jobsArr: ", jobsArr);
 
     // get list of all files paths
-    const logFileNames = jobsArr.reduce((acc, orderObj) => {
-      if(orderObj.aborted === "1") {
-        return acc;
-      }
-      const orderImagesNamesArr = orderObj.images.reduce((acc, imageObj) => {
-        const imageFullPath = imageObj["imgName"];
-        const imageName = imageFullPath.split("\\").pop();
-        acc.push(imageName);
-        return acc;
-      }, []);
-      return acc.concat(orderImagesNamesArr);
-    }, []);
+    const ordersNumbers = getFilesList(jobsArr);
+    console.log("Files: ", ordersNumbers);
 
-    const orderNumbers = logFileNames.map(fileName => {
-      let number = fileName.match(/\d{6}/);
-      if(!number) {
-        number = fileName;
-      } else {
-        number = number[0];
-      }
-      return number;
-    });
+    let result = ordersNumbers.map(logOrderNumber => {
 
-    console.log("orders numbers: ", orderNumbers);
+      let jobs = jobsArr.filter(jobObj => {
+        const fileForSearch = logOrderNumber;
+        const imgObjArr = jobObj.images;
+        return imgObjArr.some(imgObj => imgObj.imgNumber === fileForSearch);
+      });
 
-    const orderNumbersUnique = [ ...new Set(orderNumbers) ];
+      console.log(`Jobs with file ${logOrderNumber}: `, jobs);
 
-    console.log("Unique orders numbers: ", orderNumbersUnique);
+      jobs = jobs.map(jobObj => {
+        const startDateTime = jobObj.startDate + " " + jobObj.startTime.slice(0, 5);
+        const plotter = jobObj.plotter;
+        let count = "?";
+        if(! jobObj.aborted) {
+          count = jobObj.images.reduce((acc, imageObj) => {
+            if(imageObj.imgNumber === logOrderNumber || imageObj.imgName === logOrderNumber) {
+              acc++;
+            }
+            return acc;
+          }, 0);
+        }
+        let minutesTotal = "?";
+        if("minutesTotal" in jobObj) {
+          minutesTotal = jobObj.minutesTotal;
+        }
+        return {
+          startDateTime,
+          plotter,
+          minutesTotal,
+          count
+        }
+      });
 
-    const numberAndCountsObjArr = orderNumbersUnique.map(number => {
-      const count = orderNumbers.reduce((acc, orderNumber) => {
-        if(number === orderNumber) {
-          acc++;
+      const logOrderCount = jobs.reduce((acc, jobObj) => {
+        if(jobObj.count !== "?") {
+          acc += jobObj.count;
         }
         return acc;
       }, 0);
-      return { number, count };
-    });
 
-    console.log("number And Counts Obj Arr: ", numberAndCountsObjArr);
-
-    console.log("Access array: ", accessArr);
-
-    const result = numberAndCountsObjArr.map(numberAndCountsObj => {
-      let accessCount = accessArr.find(accessObj => accessObj["Номер"].toString() === numberAndCountsObj.number.toString());
-      if(accessCount) {
-        accessCount = accessCount["Тираж"];
-      } else {
-        accessCount = 0;
+      let accessOrderCount = 0;
+      const accessOrderObj = accessArr.find(accessObj => accessObj["Номер"].toString() === logOrderNumber.toString());
+      if(accessOrderObj) {
+        accessOrderCount = accessOrderCount["Тираж"];
       }
+
+      // {
+        // logOrderNumber,
+        // jobs: [
+        //   {
+        //     startDateTime,
+        //     plotter,
+        //     count | ?
+        //   }
+        // ],
+        // logOrderCount,
+        // accessOrderCount
+      // }
+
       return {
-        order: numberAndCountsObj.number,
-        logCount: numberAndCountsObj.count,
-        accessCount
+        logOrderNumber,
+        jobs,
+        logOrderCount,
+        accessOrderCount
       };
     });
 
-    result.sort((a, b) => a.order - b.order);
+    result.sort((a, b) => a.logOrderNumber - b.logOrderNumber);
 
-    console.log("Results: ", results);
+    console.log("Results: ", result);
 
     setResults(result);
     setBackdrop(false);
@@ -145,3 +184,13 @@ function App() {
 }
 
 export default App;
+
+/*
+ fail: true
+  in job object if no footer,
+
+ imgNumber: false
+  if no order number in file name
+
+ ignore images with errors
+*/
