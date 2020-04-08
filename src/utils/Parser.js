@@ -191,7 +191,6 @@ class Parser {
 	};
 
 	static parse = (str, plotter) => {
-		const t0 = performance.now();
 		let result = [];
 		const jobsStrArr = this.getJobs(str);
 		for(let i = 0; i < jobsStrArr.length; i++) {
@@ -206,9 +205,7 @@ class Parser {
 				plotter
 			}
 		});
-		const t1 = performance.now();
 		console.log("Parse result: ", result);
-		console.log("Parse took " + (t1 - t0) + " milliseconds.");
 		return result;
 	};
 }

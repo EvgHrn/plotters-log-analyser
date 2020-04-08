@@ -8,12 +8,14 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
+const windowHeight = window.innerHeight - 100;
+
 const useStyles = makeStyles({
 	root: {
 		width: '100%',
 	},
 	container: {
-		maxHeight: "100vh",
+		maxHeight: `${windowHeight}px`,
 	},
 	table: {
 		minWidth: 650,
@@ -31,8 +33,6 @@ const ResultsTable = (props) => {
 	const classes = useStyles();
 
 	const rows = props.data;
-
-	console.log("Rows: ", rows);
 
 	return (
 		<Paper className={classes.root}>
@@ -66,9 +66,9 @@ const ResultsTable = (props) => {
 										}
 
 										<TableCell align="center">{jobObj.startDateTime}</TableCell>
-										<TableCell align="center">{jobObj.plotter}</TableCell>
+										<TableCell align="center">пл. {jobObj.plotter}</TableCell>
 										<TableCell align="center">{jobObj.count}</TableCell>
-										<TableCell align="center">{jobObj.minutesTotal}</TableCell>
+										<TableCell align="center">{jobObj.minutesTotal} мин</TableCell>
 										{
 											(index === 0) ? <TableCell align="center" rowSpan={jobsCount}>{orderObj.logOrderCount}</TableCell> : null
 										}

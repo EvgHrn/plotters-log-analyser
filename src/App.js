@@ -1,19 +1,19 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import LogsInput from './components/LogsInput';
 import AccessInput from './components/AccessInput';
 import Parser from './utils/Parser';
-import Search from './components/Search';
+// import Search from './components/Search';
 import ResultsTable from './components/ResultsTable';
-import Backdrop from '@material-ui/core/Backdrop';
-import CircularProgress from '@material-ui/core/CircularProgress';
+// import Backdrop from '@material-ui/core/Backdrop';
+// import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
 const useStyles = makeStyles((theme) => ({
   app: {
     textAlign: "center",
-    height: "100vh",
+    // maxHeight: `400px`,
   },
   backdrop: {
     zIndex: theme.zIndex.drawer + 1,
@@ -25,9 +25,16 @@ function App() {
 
   const classes = useStyles();
 
-  const [backdropOpen, setBackdrop] = useState(false);
+  // const [backdropOpen, setBackdrop] = useState(false);
 
-  const [logOrders, setLogOrders] = useState([]);
+  const [log1Orders, setLog1Orders] = useState([]);
+  const [log2Orders, setLog2Orders] = useState([]);
+  const [log3Orders, setLog3Orders] = useState([]);
+  const [log4Orders, setLog4Orders] = useState([]);
+  const [log5Orders, setLog5Orders] = useState([]);
+  const [log6Orders, setLog6Orders] = useState([]);
+  const [log7Orders, setLog7Orders] = useState([]);
+  const [logDefOrders, setLogDefOrders] = useState([]);
 
   const [accessOrders, setAccessOrders] = useState([]);
 
@@ -38,9 +45,41 @@ function App() {
     if(! plotterNumber) {
       plotterNumber = "?";
     }
-    setBackdrop(true);
-    const jobsArr = logOrders.concat(Parser.parse(text, plotterNumber));
-    setLogOrders(jobsArr);
+    const newJobOrders = Parser.parse(text, plotterNumber);
+    switch(plotterNumber) {
+      case "1": {
+        setLog1Orders(newJobOrders);
+        break;
+      }
+      case "2": {
+        setLog2Orders(newJobOrders);
+        break;
+      }
+      case "3": {
+        setLog3Orders(newJobOrders);
+        break;
+      }
+      case "4": {
+        setLog4Orders(newJobOrders);
+        break;
+      }
+      case "5": {
+        setLog5Orders(newJobOrders);
+        break;
+      }
+      case "6": {
+        setLog6Orders(newJobOrders);
+        break;
+      }
+      case "7": {
+        setLog7Orders(newJobOrders);
+        break;
+      }
+      default: {
+        setLogDefOrders(newJobOrders);
+        break;
+      }
+    }
   };
 
   const accessHandle = (dataJson) => {
@@ -84,10 +123,6 @@ function App() {
     }
     */
 
-    setBackdrop(true);
-
-    console.log("jobsArr: ", jobsArr);
-
     // get list of all files paths
     const ordersNumbers = getFilesList(jobsArr);
     console.log("Files: ", ordersNumbers);
@@ -99,8 +134,6 @@ function App() {
         const imgObjArr = jobObj.images;
         return imgObjArr.some(imgObj => imgObj.imgNumber === fileForSearch);
       });
-
-      console.log(`Jobs with file ${logOrderNumber}: `, jobs);
 
       jobs = jobs.map(jobObj => {
         const startDateTime = jobObj.startDate + " " + jobObj.startTime.slice(0, 5);
@@ -154,17 +187,23 @@ function App() {
 
     console.log("Results: ", result);
 
-    setResults(result);
-    setBackdrop(false);
+    return result;
   };
 
   useEffect(() => {
-
-  }, [backdropOpen]);
-
-  useEffect(() => {
-    calculateResults(logOrders, accessOrders);
-  }, [logOrders, accessOrders]);
+    const allLogOrders = [
+      ...log1Orders,
+      ...log2Orders,
+      ...log3Orders,
+      ...log4Orders,
+      ...log5Orders,
+      ...log6Orders,
+      ...log7Orders,
+      ...logDefOrders
+    ];
+    const newResults = calculateResults(allLogOrders, accessOrders);
+    setResults(newResults);
+  }, [log1Orders, log2Orders, log3Orders, log4Orders, log5Orders, log6Orders, log7Orders, logDefOrders, accessOrders]);
 
   return (
     <Container className={classes.app}>
@@ -172,9 +211,9 @@ function App() {
       <ResultsTable data={results}/>
       <LogsInput setText={logHandle}/>
       <AccessInput setText={accessHandle}/>
-      <Backdrop className={classes.backdrop} open={backdropOpen}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
+      {/*<Backdrop className={classes.backdrop} open={backdropOpen}>*/}
+      {/*  <CircularProgress color="inherit" />*/}
+      {/*</Backdrop>*/}
     </Container >
   );
 }
