@@ -1,6 +1,15 @@
 import React, {useCallback} from 'react';
 import {useDropzone} from 'react-dropzone';
 
+const findPlotterNumber = (fileName) => {
+	const number = fileName.match(/(?<=pl)\d/);
+	if(! number) {
+		return false;
+	} else {
+		return number[0];
+	}
+};
+
 const LogsInput = (props) => {
 	const onDrop = useCallback((acceptedFiles) => {
 		acceptedFiles.forEach((file) => {
@@ -11,7 +20,7 @@ const LogsInput = (props) => {
 			reader.onload = () => {
 				// Do whatever you want with the file contents
 				const text = reader.result;
-				props.setText(text);
+				props.setText(text, findPlotterNumber(file.name));
 			};
 			reader.readAsText(file, "CP1251");
 		})

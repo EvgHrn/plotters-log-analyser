@@ -28,9 +28,13 @@ function App() {
 
   const [results, setResults] = useState([]);
 
-  const logHandle = (text) => {
+  const logHandle = (text, plotterNumber) => {
+    console.log("Plotter number: ", plotterNumber);
+    if(! plotterNumber) {
+      plotterNumber = "?";
+    }
     setBackdrop(true);
-    const jobsArr = logOrders.concat(Parser.parse(text));
+    const jobsArr = logOrders.concat(Parser.parse(text, plotterNumber));
     setLogOrders(jobsArr);
   };
 
